@@ -121,6 +121,12 @@ public class ImageRepository {
         }
     }
 
+    //The method receives the Comment that needs to be saved in the DB
+    //Creates an instance of EntityManager
+    //Starts a transaction
+    //This changes the state of the Comment model to persistent state
+    //The transaction is committed if it is successful
+    //The transaction is rolled back in case of unsuccessful transaction
     public void addComment(Comment cmt) {
         EntityManager em = emf.createEntityManager();
         EntityTransaction transaction = em.getTransaction();
