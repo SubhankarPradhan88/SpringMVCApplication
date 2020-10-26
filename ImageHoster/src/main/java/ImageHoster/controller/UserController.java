@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import javax.servlet.http.HttpSession;
 import java.util.List;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 
 @Controller
 public class UserController {
@@ -40,9 +43,17 @@ public class UserController {
     //This controller method is called when the request pattern is of type 'users/registration' and also the incoming request is of POST type
     //This method calls the business logic and after the user record is persisted in the database, directs to login page
     @RequestMapping(value = "users/registration", method = RequestMethod.POST)
-    public String registerUser(User user) {
-        userService.registerUser(user);
-        return "redirect:/users/login";
+    public String registerUser(User user, Model model) {
+        String password = user.getPassword();
+        if(validpassword(password)) {
+            userService.registerUser(user);
+            return "redirect:/users/login";
+        }else {
+            String error = "Password must contain atleast 1 alphabet, 1 number & 1 special character";
+            model.addAttribute("User", user);
+            model.addAttribute("passwordTypeError", error);
+            return "users/registration";
+        }
     }
 
     //This controller method is called when the request pattern is of type 'users/login'
@@ -74,9 +85,27 @@ public class UserController {
     @RequestMapping(value = "users/logout", method = RequestMethod.POST)
     public String logout(Model model, HttpSession session) {
         session.invalidate();
-
         List<Image> images = imageService.getAllImages();
         model.addAttribute("images", images);
         return "index";
+    }
+    // Function to check the password strength
+    public boolean validpassword(String password) {
+        boolean digits = false, character = false, specialCharacter;
+        for(int i = 0; i < password.length(); i++) {
+            // Check for digits in the password
+            if(Character.isDigit(password.charAt(i))) {
+                digits = true;
+            }
+            // Check for character in the password
+            if(Character.isLetter(password.charAt(i))) {
+                character = true;
+            }
+        }
+        // Check for special character in the password using RegEx
+        Pattern strPattern = Pattern.compile("[^a-z0-9 ]", Pattern.CASE_INSENSITIVE);
+        Matcher strMatch = strPattern.matcher(password);
+        specialCharacter = strMatch.find();
+        return digits && character && specialCharacter;
     }
 }
