@@ -55,11 +55,11 @@ public class ImageController {
         return "images/image";
     }
 
+    // Image, Comment, Date and the User is been set to the Comment model, and on comment submission required routing has been handled
     @RequestMapping(value = "/image/{imageId}/{title}/comments", method = RequestMethod.POST)
     public String postComment(@PathVariable("imageId") Integer imageId, @PathVariable("title") String title, @RequestParam("comment") String comment, HttpSession session) {
         Image image = imageService.getImageById(imageId);
         User user = (User) session.getAttribute("loggeduser");
-
         Comment cm = new Comment();
         cm.setImage(image);
         cm.setText(comment);
@@ -87,12 +87,10 @@ public class ImageController {
     //set the tags attribute of the image as a list of all the tags returned by the findOrCreateTags() method
     @RequestMapping(value = "/images/upload", method = RequestMethod.POST)
     public String createImage(@RequestParam("file") MultipartFile file, @RequestParam("tags") String tags, Image newImage, HttpSession session) throws IOException {
-
         User user = (User) session.getAttribute("loggeduser");
         newImage.setUser(user);
         String uploadedImageData = convertUploadedFileToBase64(file);
         newImage.setImageFile(uploadedImageData);
-
         List<Tag> imageTags = findOrCreateTags(tags);
         newImage.setTags(imageTags);
         newImage.setDate(new Date());
@@ -113,7 +111,7 @@ public class ImageController {
         String tags = convertTagsToString(image.getTags());
         model.addAttribute("image", image);
         model.addAttribute("tags", tags);
-        // model.addAttribute("comments", image.getComments());
+        model.addAttribute("comments", image.getComments());
         if (!image.getUser().getUsername().equals(user.getUsername())) {
             model.addAttribute("editError", "Only the owner of the image can edit the image");
             return "images/image";
@@ -165,7 +163,7 @@ public class ImageController {
         String tags = convertTagsToString(image.getTags());
         model.addAttribute("image", image);
         model.addAttribute("tags", tags);
-        // model.addAttribute("comments", image.getComments());
+        model.addAttribute("comments", image.getComments());
         if (!image.getUser().getUsername().equals(user.getUsername())) {
             model.addAttribute("deleteError", "Only the owner of the image can delete the image");
             return "images/image";
