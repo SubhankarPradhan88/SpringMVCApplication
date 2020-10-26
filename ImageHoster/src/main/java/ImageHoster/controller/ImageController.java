@@ -1,5 +1,6 @@
 package ImageHoster.controller;
 
+import ImageHoster.model.Comment;
 import ImageHoster.model.Image;
 import ImageHoster.model.Tag;
 import ImageHoster.model.User;
@@ -50,9 +51,23 @@ public class ImageController {
         Image image = imageService.getImageById(imageId);
         model.addAttribute("image", image);
         model.addAttribute("tags", image.getTags());
+        model.addAttribute("comments", image.getComments());
         return "images/image";
     }
 
+    @RequestMapping(value = "/image/{imageId}/{title}/comments", method = RequestMethod.POST)
+    public String postComment(@PathVariable("imageId") Integer imageId, @PathVariable("title") String title, @RequestParam("comment") String comment, HttpSession session) {
+        Image image = imageService.getImageById(imageId);
+        User user = (User) session.getAttribute("loggeduser");
+
+        Comment cm = new Comment();
+        cm.setImage(image);
+        cm.setText(comment);
+        cm.setCreatedDate(new Date());
+        cm.setUser(user);
+        imageService.addComment(cm);
+        return "redirect:/images/" + image.getId() + "/" + image.getTitle();
+    }
     //This controller method is called when the request pattern is of type 'images/upload'
     //The method returns 'images/upload.html' file
     @RequestMapping("/images/upload")
